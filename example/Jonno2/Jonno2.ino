@@ -862,20 +862,18 @@ void state3 :: execute5 () { //timer mode, release edit button is execute5
     display.clearDisplay();
     display.setFont();
     display.setTextSize(2);
-    display.setCursor(25, 22);
-    display.println("faders");
-    display.display();
-    delay (300);
-    display.clearDisplay();
-    delay (70);
-    display.setCursor(22, 22);
+    display.setCursor(25, 20);
+    display.print("faders");
+    display.setCursor(22, 40);
     display.println("updated");
     display.display();
-    delay(300);
+    delay (500);
     
-    if (currentDataPointer->identifier == 25) {currentState = &state0;} //25 is scene dataset and state0 is the mode
+    if (currentDataPointer->identifier == 25) {
+      currentState = &state0;} //25 is scene dataset and state0 is the mode
     else{
-    currentState = &stateOne;}
+      currentState = &stateOne;
+    }
     fademoveDisplayUpdate();
     //currentDataPointer->currentPreset();
   }
