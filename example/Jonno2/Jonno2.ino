@@ -1051,7 +1051,7 @@ void setup() {
   mu6.add_item(&mu3_mi4);
   mu7.add_item(&mu4_mi1);
   mu7.add_item(&mu4_mi2);
-  display.begin (SSD1306_SWITCHCAPVCC, 0x3D);
+  display.begin (SSD1306_SWITCHCAPVCC, 0x3C);
   display.clearDisplay();
   display.setTextColor(WHITE);
   display.drawBitmap(0, 0, mybitmap, 128, 64, 1);
@@ -1499,4 +1499,3 @@ void on_item15_selected(MenuItem * p_menu_item) {
   delay (2000);
   editMenuDisplayUpdate ();
 }
-
