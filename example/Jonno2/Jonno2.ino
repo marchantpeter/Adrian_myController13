@@ -1080,20 +1080,21 @@ void setup() {
   currentDataPointer->presetSelect();
   delay (2000);
   display.clearDisplay();
-  delay (500);
-  display.clearDisplay();
   display.setFont ();
   display.setCursor(0, 4);
   display.setTextColor(WHITE);
   display.setTextSize(1);
   display.println("SELECT NEXT PRESET: ");
-  currentDataPointer->bignumber();
+  //currentDataPointer->bignumber();
   if (currentDataPointer->identifier == 25) {
-  display.setCursor(0, 50);
-      display.setFont (&FreeMono24pt7b);
-      display.printf ("%03d%s%d", storedSettings.program + 1, ":", scene.Update);
-  } else { display.setCursor(22, 50);
-  currentDataPointer->bignumber();}
+    display.setCursor(0, 50);
+    display.setFont (&FreeMono24pt7b);
+    display.printf ("%03d%s%d", storedSettings.program + 1, ":", scene.Update);
+  } else { 
+    display.setCursor(22, 50);
+    currentDataPointer->bignumber();
+  }
+  
   display.display();
 }
 
