@@ -973,6 +973,9 @@ void setup() {
   midi.begin(true);
   ble.verbose(false);
 
+  //wired midi
+  Serial1.begin(31250);
+
   /*FlashStorage management*/
   storedSettings = my_flash_store.read();
   if (!(storedSettings.valid)) {
@@ -995,7 +998,11 @@ void setup() {
     scene.Update = storedSettings.scene;
     currentDataPointer = cPParray[storedSettings.preset - 21];
   }
-  if (currentDataPointer->identifier == 25) {currentState = &state0;} else {currentState = &stateOne;}; 
+  if (currentDataPointer->identifier == 25) {
+    currentState = &state0;
+  } else {
+    currentState = &stateOne;
+  } 
   analogWrite (pwm, storedSettings.rotary1mod * 10);
   // midiA.begin();
 
@@ -1273,6 +1280,11 @@ void CCbleTXmidi (int CC, int Value) {
   if (isConnected) {
     midi.send(0xB0 + (storedSettings.channel - 1), storedSettings.CCnumber[CC], Value);
   }
+
+  //wired midi
+  Serial1.write(0xB0 + (storedSettings.channel - 1));
+  Serial1.write(storedSettings.CCnumber[CC]);
+  Serial1.write(Value);
 }
 
 /*Fader Callbacks*/
