@@ -779,6 +779,10 @@ Base * cPParray[] = {&preset1, &preset2, &preset3, &preset4, &scene};
   if (isConnected) {
     midi.send(0xB0 + (storedSettings.channel - 1), storedSettings.sceneCC, Update);
   }
+  //wired midi
+  Serial1.write(0xB0 + (storedSettings.channel - 1));
+  Serial1.write(storedSettings.sceneCC);
+  Serial1.write(Update);
 }*/
 
 void state0 :: execute1 () {// state0 is preset/SCENE select mode, execute1 is leftrotary
@@ -815,6 +819,11 @@ void state1 :: execute3 () { //press select button is execute3
   if (isConnected) {
     midi.send(0xC0 + (storedSettings.channel - 1), storedSettings.program, storedSettings.program);
   }
+  //wired midi
+  Serial1.write(0xC0 + (storedSettings.channel - 1));
+  Serial1.write(storedSettings.program);
+  Serial1.write(storedSettings.program);
+
   my_flash_store.write(storedSettings);
   // if (storedSettings.msdelay > 0.05) {
   //   delay (storedSettings.msdelay * 1000);
@@ -837,17 +846,25 @@ void state2 :: execute6 () { //timer mode, release select button is execute6
     delay (200);
     storedSettings.program = updateprogram;
     storedSettings.scene = scene.Update;
-  if (isConnected) {
-    midi.send(0xC0 + (storedSettings.channel - 1), storedSettings.program, storedSettings.program);
-    midi.send(0xB0 + (storedSettings.channel - 1), storedSettings.sceneCC, storedSettings.scene);
-  }
-  my_flash_store.write(storedSettings);
+    if (isConnected) {
+      midi.send(0xC0 + (storedSettings.channel - 1), storedSettings.program, storedSettings.program);
+      midi.send(0xB0 + (storedSettings.channel - 1), storedSettings.sceneCC, storedSettings.scene);
+    }
+    //wired midi
+    Serial1.write(0xC0 + (storedSettings.channel - 1));
+    Serial1.write(storedSettings.program);
+    Serial1.write(storedSettings.program);
+    Serial1.write(0xB0 + (storedSettings.channel - 1));
+    Serial1.write(storedSettings.sceneCC);
+    Serial1.write(storedSettings.scene);
+
+
+    my_flash_store.write(storedSettings);
     currentDataPointer->store(); // store where we are at, short press
     //
-  }
-  else {
+  } else {
     SCENE = !SCENE; // toggle preset/SCENE on a long press
-  // go back to preset/SCENE select mode
+    // go back to preset/SCENE select mode
   }
   currentState = &state0; 
 }
@@ -936,7 +953,7 @@ Menu mu2("CC SELECT");
 Menu mu5("STOMP CC SELECT");
 Menu mu6("FADER CC SELECT");
 Menu mu7("SCENE CC SELECT");
-MenuItem mm_mi0 ("AUTO UPDATE DELAY", &on_itemGLOBAL_selected);
+MenuItem mm_mi0 ("FADER UPDATE DELAY", &on_itemGLOBAL_selected);
 MenuItem mm_mi1 ("MIDI CHANNEL", &on_item0_selected);
 MenuItem mm_mi2 ("LED BRIGHTNESS", &on_itemLED_selected);
 MenuItem mu1_mi1("000 - 127", &on_item1_selected);
