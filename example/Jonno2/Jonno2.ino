@@ -419,8 +419,11 @@ class GlobalDelay: public Data<float> {
     }
 } update_delay (11, "UPDATE DELAY (sec)", "", "%.1f", storedSettings.msdelay, true);
 
+//LED brightness on sliders
 class Lights : public Data<int> {
   public:
+    int brightnessLevels[21]={0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 85, 100, 120, 140, 160, 180, 200, 220, 240, 255};
+    //int brightnessLevels[21]={0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 120, 140, 160, 200, 255};
     Lights (uint8_t _identifier, char * _heading, char * _description, char * _format, int _Update, bool _current) {
       identifier = _identifier;
       heading = _heading;
@@ -442,7 +445,7 @@ class Lights : public Data<int> {
       }
     }
     virtual void select () {
-      analogWrite (pwm, Update * 10);
+      analogWrite (pwm, brightnessLevels[Update]);
       description = " SELECT";
       current = true;
       peripheralDisplayUpdate(storedSettings.rotary1mod);
