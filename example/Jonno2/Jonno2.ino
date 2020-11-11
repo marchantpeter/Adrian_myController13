@@ -98,6 +98,7 @@ elapsedMillis switchesPressTimer;
 
 //debug values
 elapsedMillis debugTimer1;
+elapsedMillis debugOutputTimer;
 int debugValue1 = 0;
 int debugValue2 = 0;
 //MIDI_CREATE_INSTANCE (HardwareSerial, Serial1, midiA);
@@ -893,7 +894,7 @@ void state3 :: execute5 () { //timer mode, release edit button is execute5
       CCbleTXmidi (i + 4, faderValue[i]);
     }
     display.clearDisplay();
-   display.setFont (&FreeMono9pt7b);
+    display.setFont (&FreeMono9pt7b);
     display.setTextSize(1);
     display.setCursor(30, 25);
     display.print("faders");
@@ -1230,23 +1231,33 @@ void disconnected(void) {
 /*Button Callbacks*/
 
 void SelectPress (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle SelectPress");
   currentState->execute3();
 }
 
 void SelectRelease (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle SelectRelease");
   currentState->execute6();
 }
 
 
 void EditPress (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle EditPress");
   currentState->execute4();
 }
 
 void EditRelease (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle EditRelease");
   currentState->execute5();
 }
 
 void Stomp1ON(void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Stomp1ON");
   if (buttOnOff[0] == buttOff) {
     CCbleTXmidi(0, 0x7F);
     buttOnOff[0] = buttOn;
@@ -1258,6 +1269,8 @@ void Stomp1ON(void) {
 }
 
 void Stomp2ON(void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Stomp2ON");
   if (buttOnOff[1] == buttOff) {
     CCbleTXmidi(1, 0x7F);
     buttOnOff[1] = buttOn;
@@ -1269,6 +1282,8 @@ void Stomp2ON(void) {
 }
 
 void Stomp3ON(void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Stomp3ON");
   if (buttOnOff[2] == buttOff) {
     CCbleTXmidi(2, 0x7F);
     buttOnOff[2] = buttOn;
@@ -1280,6 +1295,8 @@ void Stomp3ON(void) {
 }
 
 void Stomp4ON(void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Stomp4ON");
   if (buttOnOff[3] == buttOff) {
     CCbleTXmidi(3, 0x7F);
     buttOnOff[3] = buttOn;
@@ -1292,6 +1309,8 @@ void Stomp4ON(void) {
 
 /*Rotary Callbacks*/
 void Right (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Right...");
   rcount++;
   if (rcount > 1) {
     lcount = 0;
@@ -1301,6 +1320,8 @@ void Right (void) {
 }
 
 void Left (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Left...");
   lcount++;
   if (lcount > 1) {
     rcount = 0;
@@ -1311,10 +1332,14 @@ void Left (void) {
 
 /*Toggle callback*/
 void  Tog1ON (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Tog1ON");
   currentState->execute2();
 }
 
 void  Tog2ON (void) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle Tog2ON");
   currentState->execute1();
 }
 
@@ -1340,57 +1365,77 @@ void faderCallback (int index) {
 }
 
 void slider1Inc (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider1Inc");
   faderValue [0] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (0);
 }
 
 void slider1Dec (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider1Dec");
   faderValue [0] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (0);
 }
 
 void slider2Inc (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider2Inc");
   faderValue [1] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (1);
 }
 void slider2Dec (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider2Dec");
   faderValue [1] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (1);
 }
 
 void slider3Inc (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider3Inc");
   faderValue [2] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (2);
 }
 
 void slider3Dec (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider3Dec");
   faderValue [2] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (2);
 }
 
 void slider4Inc (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider4Inc");
   faderValue [3] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (3);
 }
 
 void slider4Dec (int currentValue) {
+  Serial.println(debugOutputTimer);
+  Serial.println("Handle slider4Dec");
   faderValue [3] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (3);
 }
 
 void slider1SAME (int currentValue) {
+  //Serial.println("handle slider1SAME");
   faderValue [0] = map (currentValue, 0, 1023, 0, 127);
 }
 
 void slider2SAME (int currentValue) {
+  //Serial.println("handle slider2SAME");
   faderValue [1] = map (currentValue, 0, 1023, 0, 127);
 }
 
 void slider3SAME (int currentValue) {
+  //Serial.println("handle slider3SAME");
   faderValue [2] = map (currentValue, 0, 1023, 0, 127);
 }
 
 void slider4SAME (int currentValue) {
+  //Serial.println("handle slider4SAME");
   faderValue [3] = map (currentValue, 0, 1023, 0, 127);
 }
 
