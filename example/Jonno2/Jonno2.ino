@@ -82,10 +82,10 @@ const unsigned char mybitmap [] PROGMEM = {
 #define OLED_RESET  5
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-Fader slider1 (A8, 9); //aref and jitter suppression amount
-Fader slider2 (A2, 9);
-Fader slider3 (A3, 9);
-Fader slider4 (A4, 9);
+Fader slider1 (A8, 15); //aref and jitter suppression amount
+Fader slider2 (A2, 15);
+Fader slider3 (A3, 15);
+Fader slider4 (A4, 15);
 Rotary encoder1 (19, 0); // left and right
 Switches Buttons (6); //the mux data pin
 Adafruit_BluefruitLE_SPI ble(8, 7, 4); //these are internal connections, don't worry about them.
@@ -520,7 +520,7 @@ class Scene : public Data<int> {
     void currentPreset () {
       display.clearDisplay();
       display.setFont ();
-      display.setCursor(11, 4);
+      display.setCursor(12, 4);
       display.setTextSize(1);
       display.println ("- CURRENT PRESET -");
       display.setCursor(11, 50);
@@ -563,19 +563,21 @@ class PresetControl : public Base {
     void peripheralDisplayUpdate () {
       display.clearDisplay();
       display.setFont ();
-      display.setCursor(0, 4);
+      display.setCursor(0, 2);
       display.setTextColor(WHITE);
       display.setTextSize(1);
-      display.println("SELECT NEXT PRESET:");
-      display.setCursor(0, 50);
+      display.println("SELECT NEXT");
+      display.setFont ();
+      display.setCursor(0, 15);
+      display.setTextColor(WHITE);
+      display.setTextSize(1);
+      display.println("PRESET:");
+      display.setCursor(-4, 55);
       bignumber ();
       display.setFont ();
-      display.setCursor(85, 23);
+      display.setCursor(85, 32);
       display.setTextSize(1);
-      display.print ("current");
-      display.setCursor(91, 33);
-      display.setTextSize(1);
-      display.print ("preset");
+      display.print ("CURRENT");
       display.setCursor(84, 55);
       smallnumber ();
       display.display();
@@ -891,14 +893,14 @@ void state3 :: execute5 () { //timer mode, release edit button is execute5
       CCbleTXmidi (i + 4, faderValue[i]);
     }
     display.clearDisplay();
-    display.setFont();
-    display.setTextSize(2);
-    display.setCursor(25, 20);
+   display.setFont (&FreeMono9pt7b);
+    display.setTextSize(1);
+    display.setCursor(30, 25);
     display.print("faders");
-    display.setCursor(22, 40);
+    display.setCursor(26, 47);
     display.println("updated");
     display.display();
-    delay (500);
+    delay (800);
 
     if (currentDataPointer->identifier == 25) {
       currentState = &state0;
@@ -1097,24 +1099,28 @@ void setup() {
   display.setTextColor(WHITE);
   display.drawBitmap(0, 0, mybitmap, 128, 64, 1);
   display.display();
-  delay (2500);
+  delay (1000);
   display.clearDisplay();
   delay (500);
-  display.setCursor(23, 22);
-  display.setFont();
-  display.setTextSize(2);
+  display.setFont (&FreeMono9pt7b);
+  display.setTextSize(1);
+  display.setCursor(23, 38);
   display.println("effects");
   display.display();
   delay (500);
   display.clearDisplay();
   delay (100);
-  display.setCursor(24, 22);
+  display.setFont (&FreeMono9pt7b);
+  display.setTextSize(1);
+  display.setCursor(24, 38);
   display.println("control");
   display.display();
   delay (500);
   display.clearDisplay();
   delay (100);
-  display.setCursor(29, 22);
+  display.setFont (&FreeMono9pt7b);
+  display.setTextSize(1);
+  display.setCursor(29, 38);
   display.println("system");
   display.display();
   delay (1000);
@@ -1171,7 +1177,7 @@ void buttpressDisplayUpdate (void) {
 void fademoveDisplayUpdate (void) {
   display.clearDisplay();
   display.setFont ();
-  display.setCursor(34, 3);
+  display.setCursor(31, 4);
   display.setTextColor(WHITE);
   display.setTextSize(1);
   display.printf("%s\n\n\n", " - FADERS - ");
