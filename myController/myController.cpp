@@ -8,6 +8,7 @@ Fader * FobjArray[4] {NULL, NULL, NULL, NULL};
 const int8_t encState [16] {0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0};
 //elapsedMicros RotaryTimer;
 elapsedMillis FaderTimer;
+elapsedMillis rotaryTimer;
 //elapsedMicros SwitchesTimer;
 
 Switches::Switches (uint8_t pin1) {
@@ -137,11 +138,13 @@ switchesArray[i] |= ((switchesRaw >> i) & 0x001);
 	//}
 }
 
-Rotary::Rotary (uint8_t left, uint8_t right) {
+Rotary::Rotary (uint8_t left, uint8_t right, uint8_t debounce) {
   //RobjArray[Rotary::objectIndex] = this;
   //Rotary::objectIndex++;
   leftPin = left;
   rightPin = right;
+  rotaryDebounce = debounce;
+  rotaryTimer = 0;
   //begin=true;
 }
 
@@ -163,14 +166,18 @@ rotaryData |= (rotaryBraw <<1) | rotaryAraw;
 				
 rotaryState = (encState[(rotaryData & 0x0F)]);
 				
-if (rotaryState > 0) {
-					if (pLeft) {pLeft();}
-				}
-				if (rotaryState < 0) {
-					if (pRight) {pRight();}
-				}
-			
-		//}
+if (rotaryState > 0 && rotaryTimer>=rotaryDebounce) {
+	rotaryTimer=0;
+	if (pLeft) {
+		pLeft();
+	}
+}
+if (rotaryState < 0 && rotaryTimer>=rotaryDebounce) {
+	rotaryTimer=0;
+	if (pRight) {
+		pRight();
+	}
+}
 }
 
 

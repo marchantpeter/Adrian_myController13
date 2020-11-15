@@ -86,11 +86,11 @@ Fader slider1 (A8, 15); //aref and jitter suppression amount
 Fader slider2 (A2, 15);
 Fader slider3 (A3, 15);
 Fader slider4 (A4, 15);
-Rotary encoder1 (19, 0); // left and right
+Rotary encoder1 (19, 0, 5); // left and right pins.  Debounce ms.
 Switches Buttons (6); //the mux data pin
 Adafruit_BluefruitLE_SPI ble(8, 7, 4); //these are internal connections, don't worry about them.
 Adafruit_BLEMIDI midi(ble);
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET, 800000, 100000);
 Adafruit_SSD1306 * dptr = &display;
 MyRenderer my_renderer (dptr);
 MenuSystem ms(my_renderer);
@@ -900,7 +900,10 @@ void state3 :: execute5 () { //timer mode, release edit button is execute5
     display.print("faders");
     display.setCursor(26, 47);
     display.println("updated");
+    debugTimer1= 0;
     display.display();
+    Serial.println("fader display refresh time...");
+    Serial.println(debugTimer1);
     delay (800);
 
     if (currentDataPointer->identifier == 25) {
@@ -1146,6 +1149,7 @@ void setup() {
   }
 
   display.display();
+
 }
 
 void loop() {
@@ -1334,6 +1338,7 @@ void Left (void) {
 void  Tog1ON (void) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Tog1ON");
+
   currentState->execute2();
 }
 

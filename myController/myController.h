@@ -81,7 +81,7 @@ int Ccmd;
 class
   Rotary {
   public:
-    Rotary (uint8_t, uint8_t );
+    Rotary (uint8_t, uint8_t, uint8_t );
 Rotary () {};
     //static uint8_t objectIndex;
 void ReadWrite();
@@ -98,6 +98,7 @@ uint8_t rotaryAraw;
     
     uint8_t leftPin;
     uint8_t rightPin;
+	uint8_t rotaryDebounce;
 };
 class
 	Fader {
