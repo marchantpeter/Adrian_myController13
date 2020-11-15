@@ -1339,13 +1339,40 @@ void  Tog1ON (void) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Tog1ON");
 
-  currentState->execute2();
+  Serial.println("current state identifier = ");
+  Serial.println(currentState->identifier);
+
+  Serial.println("storedsettings.preset = ");
+  Serial.println(storedSettings.preset);
+
+  //if on preset select screen
+  if (currentState->identifier==1) {
+    if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
+      currentDataPointer->plus();
+      currentState->execute3();
+    } else { //keep the preset the same - increment the screne
+
+    }
+  } else {
+    currentState->execute2();
+  }
 }
 
 void  Tog2ON (void) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Tog2ON");
-  currentState->execute1();
+
+  //if on preset select screen
+  if (currentState->identifier==1) {
+    if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
+      currentDataPointer->minus();
+      currentState->execute3();
+    } else { //keep the preset the same - increment the screne
+
+    }
+  } else {
+    currentState->execute1();
+  }
 }
 
 void CCbleTXmidi (int CC, int Value) {
@@ -1370,56 +1397,56 @@ void faderCallback (int index) {
 }
 
 void slider1Inc (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider1Inc");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider1Inc");
   faderValue [0] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (0);
 }
 
 void slider1Dec (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider1Dec");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider1Dec");
   faderValue [0] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (0);
 }
 
 void slider2Inc (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider2Inc");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider2Inc");
   faderValue [1] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (1);
 }
 void slider2Dec (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider2Dec");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider2Dec");
   faderValue [1] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (1);
 }
 
 void slider3Inc (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider3Inc");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider3Inc");
   faderValue [2] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (2);
 }
 
 void slider3Dec (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider3Dec");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider3Dec");
   faderValue [2] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (2);
 }
 
 void slider4Inc (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider4Inc");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider4Inc");
   faderValue [3] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (3);
 }
 
 void slider4Dec (int currentValue) {
-  Serial.println(debugOutputTimer);
-  Serial.println("Handle slider4Dec");
+  //Serial.println(debugOutputTimer);
+  //Serial.println("Handle slider4Dec");
   faderValue [3] = map (currentValue, 0, 1023, 0, 127);
   faderCallback (3);
 }
