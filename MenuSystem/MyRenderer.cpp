@@ -10,7 +10,25 @@ void MyRenderer::render(Menu const& menu) const
     displayptr->printf("%s\n\n",menu.get_name());
     String buffer;
     MenuComponent const* cp_menu_sel = menu.get_current_component();
-    for (int i = 0; i < menu.get_num_menu_components(); ++i)
+    int drawFrom = 0;
+    int numMenuComponents = menu.get_num_menu_components();
+    if (numMenuComponents>6) {
+        int currentItemIndex=0;
+        for (currentItemIndex = 0; currentItemIndex < numMenuComponents; ++currentItemIndex)
+        {
+            if (cp_menu_sel==menu.get_menu_component(currentItemIndex)) {
+                break;
+            }
+        }
+        drawFrom=currentItemIndex-2;
+        if (drawFrom<0) {
+            drawFrom=0;
+        } else if (drawFrom+6>numMenuComponents) {
+            drawFrom=numMenuComponents-6;
+        }
+    }
+
+    for (int i = drawFrom; i < numMenuComponents; ++i)
     {
         MenuComponent const* cp_m_comp = menu.get_menu_component(i);
         if (cp_menu_sel == cp_m_comp)   {

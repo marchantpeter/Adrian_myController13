@@ -986,6 +986,9 @@ MenuItem mu1_mi2("001 - 128", &on_item2_selected);
 MenuItem mu1_mi3("1A - 8D", &on_item3_selected);
 MenuItem mu1_mi6("1A - 32D", &on_itemLINE6_selected);
 MenuItem mu1_mi7("001 - 128 + scenes", &on_itemAXE_selected);
+MenuItem mu1_mi8("Kemper", &on_itemAXE_selected);
+MenuItem mu1_mi9("Kemper + Scenes", &on_itemAXE_selected);
+
 MenuItem mu2_mi1("STOMP 1", &on_item6_selected);
 MenuItem mu2_mi2("STOMP 2", &on_item7_selected);
 MenuItem mu2_mi3("STOMP 3", &on_item8_selected);
@@ -1080,11 +1083,15 @@ void setup() {
   ms.get_root_menu().add_item(&mm_mi0);
   ms.get_root_menu().add_item(&mm_mi1);
   ms.get_root_menu().add_item(&mm_mi2);
+
   mu1.add_item(&mu1_mi1);
   mu1.add_item(&mu1_mi2);
   mu1.add_item(&mu1_mi3);
   mu1.add_item(&mu1_mi6);
   mu1.add_item(&mu1_mi7);
+  mu1.add_item(&mu1_mi8);
+  mu1.add_item(&mu1_mi9);
+  
   mu2.add_menu(&mu5);
   mu2.add_menu(&mu6);
   mu2.add_menu(&mu7);
