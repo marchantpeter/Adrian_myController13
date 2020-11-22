@@ -138,14 +138,15 @@ switchesArray[i] |= ((switchesRaw >> i) & 0x001);
 	//}
 }
 
-Rotary::Rotary (uint8_t left, uint8_t right, uint8_t debounce) {
+Rotary::Rotary (uint8_t a, uint8_t b, uint8_t debounce) {
   //RobjArray[Rotary::objectIndex] = this;
   //Rotary::objectIndex++;
-  leftPin = left;
-  rightPin = right;
   rotaryDebounce = debounce;
   rotaryTimer = 0;
-  //begin=true;
+
+  pinA = a;
+  pinB = b;
+  pinALast=LOW;
 }
 
 void Rotary::SetHandleLeft(void (*Left) (void)) {
@@ -155,30 +156,46 @@ void Rotary::SetHandleRight (void (*Right) (void)) {
   pRight = Right;
 }
 
-void Rotary::ReadWrite() {
-		//for (int i = 0; i < Rotary::objectIndex; i++) {
-rotaryAraw = digitalRead (leftPin);
-      	rotaryBraw = digitalRead (rightPin);
-		   
-rotaryData <<= 2;
+void Rotary::Read() {
+	int n = digitalRead(pinA);
+	if ((pinALast == LOW) && (n == HIGH) && (rotaryTimer>=rotaryDebounce)) {
+		rotaryTimer=0;
+		if (digitalRead(pinB) == LOW) {
+			pLeft();
+		} else {
+			pRight();
+		}
+	}
+	pinALast = n;
+}
 
-rotaryData |= (rotaryBraw <<1) | rotaryAraw;
+/*
+//Adrian's original encoder reading.  Uses bit shifting etc to create 4 bit int of pin A and pin B and their previous values.  This is 16 possible states that it looks up in an array to work out the direction. 
+//it would read 2 values at a time when we put a knob on the encoder - but was fine without!
+void Rotary::ReadWrite() {
+	rotaryAraw = digitalRead (leftPin);
+	rotaryBraw = digitalRead (rightPin);
+		   
+	rotaryData <<= 2;
+
+	rotaryData |= (rotaryBraw <<1) | rotaryAraw;
 				
-rotaryState = (encState[(rotaryData & 0x0F)]);
+	rotaryState = (encState[(rotaryData & 0x0F)]);
 				
-if (rotaryState > 0 && rotaryTimer>=rotaryDebounce) {
-	rotaryTimer=0;
-	if (pLeft) {
-		pLeft();
+	if (rotaryState > 0 && rotaryTimer>=rotaryDebounce) {
+		rotaryTimer=0;
+		if (pLeft) {
+			pLeft();
+		}
+	}
+	if (rotaryState < 0 && rotaryTimer>=rotaryDebounce) {
+		rotaryTimer=0;
+		if (pRight) {
+			pRight();
+		}
 	}
 }
-if (rotaryState < 0 && rotaryTimer>=rotaryDebounce) {
-	rotaryTimer=0;
-	if (pRight) {
-		pRight();
-	}
-}
-}
+*/
 
 
 void Fader::SetHandleIncrease(void(*ptr) (int)) {

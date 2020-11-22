@@ -86,7 +86,7 @@ Fader slider1 (A8, 15); //aref and jitter suppression amount
 Fader slider2 (A2, 15);
 Fader slider3 (A3, 15);
 Fader slider4 (A4, 15);
-Rotary encoder1 (19, 0, 5); // left and right pins.  Debounce ms.
+Rotary encoder1 (0, 19, 1); // pin A and pin B.  Debounce ms - but we aren't using interrupts and display refresh takes >20ms - so might not be necessary.
 Switches Buttons (6); //the mux data pin
 Adafruit_BluefruitLE_SPI ble(8, 7, 4); //these are internal connections, don't worry about them.
 Adafruit_BLEMIDI midi(ble);
@@ -251,8 +251,6 @@ struct Settings {
 
 FlashStorage(my_flash_store, Settings);
 int updateprogram = storedSettings.program;
-uint8_t lcount = 0;
-uint8_t rcount = 0;
 bool INIT2 [] = {true, true, true, true};
 bool isConnected = false;
 const int alpha [] {65, 66, 67, 68};
@@ -1161,7 +1159,7 @@ void setup() {
 
 void loop() {
   ble.update(500); // interval for each scanning ~ 500ms (non blocking)
-  encoder1.ReadWrite();
+  encoder1.Read();
   Buttons.ReadWrite();
   Fader::ReadWrite();
 }
@@ -1322,23 +1320,13 @@ void Stomp4ON(void) {
 void Right (void) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Right...");
-  rcount++;
-  if (rcount > 1) {
-    lcount = 0;
-    rcount = 0;
-    currentState->execute2();
-  }
+  currentState->execute2();
 }
 
 void Left (void) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Left...");
-  lcount++;
-  if (lcount > 1) {
-    rcount = 0;
-    lcount = 0;
-    currentState->execute1();
-  }
+  currentState->execute1();
 }
 
 /*Toggle callback*/

@@ -84,7 +84,8 @@ class
     Rotary (uint8_t, uint8_t, uint8_t );
 Rotary () {};
     //static uint8_t objectIndex;
-void ReadWrite();
+//void ReadWrite();
+void Read();
 uint8_t rotaryAraw;
     uint8_t rotaryBraw;
     void SetHandleLeft (void (void));
@@ -96,9 +97,10 @@ uint8_t rotaryAraw;
         uint8_t rotaryData;
     int8_t rotaryState;
     
-    uint8_t leftPin;
-    uint8_t rightPin;
-	uint8_t rotaryDebounce;
+    uint8_t pinA;
+    uint8_t pinB;
+    uint8_t pinALast;
+    uint8_t rotaryDebounce;
 };
 class
 	Fader {
