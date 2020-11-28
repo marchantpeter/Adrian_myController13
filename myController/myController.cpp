@@ -149,22 +149,50 @@ Rotary::Rotary (uint8_t a, uint8_t b, uint8_t debounce) {
   pinALast=LOW;
 }
 
-void Rotary::SetHandleLeft(void (*Left) (void)) {
+void Rotary::setAcceleration(int p[], int a[], int pause) {
+	accelerationRestartMs = pause;
+
+	for (int i=0; i<accelerationArraySize; i++) {
+		physicalSteps[i] = p[i];
+		acceleratedSteps[i] = a[i];
+	}	
+  
+}
+
+void Rotary::SetHandleLeft(void (*Left) (int)) {
   pLeft = Left;
 }
-void Rotary::SetHandleRight (void (*Right) (void)) {
+void Rotary::SetHandleRight (void (*Right) (int)) {
   pRight = Right;
+}
+
+int Rotary::getAccelerationValue() {
+	int absMovement = abs(accelerationMovement);
+	for (int i=0; i<accelerationArraySize; i++) {
+		if (physicalSteps[i]>=absMovement) {
+			return acceleratedSteps[i];
+		}
+	}
+	return acceleratedSteps[accelerationArraySize-1];
 }
 
 void Rotary::Read() {
 	int n = digitalRead(pinA);
 	if ((pinALast == LOW) && (n == HIGH) && (rotaryTimer>=rotaryDebounce)) {
-		rotaryTimer=0;
 		if (digitalRead(pinB) == LOW) {
-			pLeft();
+			if (accelerationMovement>0 || rotaryTimer>accelerationRestartMs) {
+				accelerationMovement = 0;
+			}
+			pLeft(getAccelerationValue());
+			accelerationMovement--;
 		} else {
-			pRight();
+			if (accelerationMovement<0 || rotaryTimer>accelerationRestartMs) {
+				accelerationMovement = 0;
+			}
+			pRight(getAccelerationValue());
+			accelerationMovement++;
 		}
+		rotaryTimer=0;
 	}
 	pinALast = n;
 }

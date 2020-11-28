@@ -167,6 +167,8 @@ class State {
   public:
     virtual void execute1() {};
     virtual void execute2() {};
+    virtual void decrementBy(int) {};
+    virtual void incrementBy(int) {};
     virtual void execute3() {};
     virtual void execute4() {};
     virtual void execute5() {};
@@ -192,6 +194,8 @@ class state1 : public State {
     }
     void execute1();
     void execute2();
+    void incrementBy(int);
+    void decrementBy(int);
     void execute3();
     void execute4();
 } stateOne;
@@ -269,6 +273,16 @@ class Base {
         updateprogram = 127;
       }
     }
+
+    //if incrementBy() and decrementBy() are not overridden, they will just plus or minus 
+    virtual void incrementBy(int) {
+      plus();  
+    }
+
+    virtual void decrementBy(int) {
+      minus();  
+    }
+    
     virtual void select() = 0;
     virtual void store() = 0;
     virtual void presetSelect() {};
@@ -628,6 +642,20 @@ class Preset1 : public PresetControl {
     void store () {
       currentPreset();
     }
+    
+    void incrementBy (int amount) {
+      updateprogram+=amount;
+      if (updateprogram >= 128) {
+        updateprogram = 0;
+      }
+    }
+    void decrementBy (int amount) {
+        updateprogram-=amount;
+      if (updateprogram <= -1) {
+        updateprogram = 127;
+      }
+    }
+    
     virtual void bignumber () {
       display.setFont (&FreeMono24pt7b);
       display.printf (format, updateprogram);
@@ -696,6 +724,20 @@ class Preset2 : public PresetControl {
         }
       }
       }*/
+
+      void incrementBy (int amount) {
+      Serial.println("preset 1 increment by");
+      updateprogram+=amount;
+      if (updateprogram >= 128) {
+        updateprogram = 0;
+      }
+    }
+    void decrementBy (int amount) {
+      updateprogram-=amount;
+      if (updateprogram <= -1) {
+        updateprogram = 127;
+      }
+    }
 } preset2 (22, "001 - 128", "%03d");
 
 class Preset3 : public PresetControl {
@@ -723,6 +765,7 @@ class Preset3 : public PresetControl {
         updateprogram = 31;
       }
     }
+    
     virtual void bignumber () {
       display.setFont (&FreeMono24pt7b);
       int number = (updateprogram + 4) / 4;
@@ -821,10 +864,21 @@ void state0 :: execute4 () { //press edit button is execute4
   currentState = &stateThree; //timer mode for preset-to-menu mode
 }
 
+void state1 :: decrementBy (int amount) {// state1 is preset select mode, execute1 is leftrotary
+  currentDataPointer->decrementBy(amount);
+  currentDataPointer->select();
+}
+
 void state1 :: execute1 () {// state1 is preset select mode, execute1 is leftrotary
   currentDataPointer->minus();
   currentDataPointer->select();
 }
+
+void state1 :: incrementBy (int amount) { //execute2 is rightrotary
+  currentDataPointer->incrementBy(amount);
+  currentDataPointer->select();
+}
+
 void state1 :: execute2 () { //execute2 is rightrotary
   currentDataPointer->plus();
   currentDataPointer->select();
@@ -1052,6 +1106,11 @@ void setup() {
   /*set callbacks*/
   ble.setConnectCallback(connected);
   ble.setDisconnectCallback(disconnected);
+
+  int physicalSteps[3] = {3, 5, 7};
+  int acceleratedSteps[3] = {1, 3, 5};
+  int accelerationRestartMs = 225;
+  encoder1.setAcceleration(physicalSteps, acceleratedSteps, accelerationRestartMs); 
   encoder1.SetHandleLeft (Left);
   encoder1.SetHandleRight (Right);
   Buttons.SetHandleB1ON (SelectPress);
@@ -1317,16 +1376,26 @@ void Stomp4ON(void) {
 }
 
 /*Rotary Callbacks*/
-void Right (void) {
+void Right (int amount) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Right...");
-  currentState->execute2();
+  Serial.println(amount);
+  if (amount>1 && currentState->identifier == 1) { //preset
+    currentState->incrementBy(amount);
+  } else {
+    currentState->execute2();
+  }
 }
 
-void Left (void) {
+void Left (int amount) {
   Serial.println(debugOutputTimer);
   Serial.println("Handle Left...");
-  currentState->execute1();
+  Serial.println(amount);
+  if (amount>1 && currentState->identifier == 1) { //preset
+    currentState->decrementBy(amount);
+  } else {
+    currentState->execute1();
+  }
 }
 
 /*Toggle callback*/

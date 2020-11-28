@@ -83,24 +83,33 @@ class
   public:
     Rotary (uint8_t, uint8_t, uint8_t );
 Rotary () {};
-    //static uint8_t objectIndex;
-//void ReadWrite();
-void Read();
-uint8_t rotaryAraw;
-    uint8_t rotaryBraw;
-    void SetHandleLeft (void (void));
-    void SetHandleRight (void (void));
-//void RotaryRead();
+  //static uint8_t objectIndex;
+  //void ReadWrite();
+  void Read();
+  void setAcceleration(int[], int[], int); //physicalSteps, acceleratedSteps, maxPause
+  int getAccelerationValue();
+  uint8_t rotaryAraw;
+  uint8_t rotaryBraw;
+  void SetHandleLeft (void (int));
+  void SetHandleRight (void (int));
+  //void RotaryRead();
   private:
-    void (*pLeft) (void) = NULL;
-    void (*pRight) (void) = NULL;
-        uint8_t rotaryData;
+    void (*pLeft) (int) = NULL;
+    void (*pRight) (int) = NULL;
+    uint8_t rotaryData;
     int8_t rotaryState;
     
     uint8_t pinA;
     uint8_t pinB;
     uint8_t pinALast;
     uint8_t rotaryDebounce;
+
+    int accelerationArraySize = 3;
+    int accelerationRestartMs;
+    int physicalSteps[3];
+    int acceleratedSteps[3];
+    int accelerationMovement = 0;
+  
 };
 class
 	Fader {
