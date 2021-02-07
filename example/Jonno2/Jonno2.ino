@@ -95,6 +95,8 @@ Adafruit_SSD1306 * dptr = &display;
 MyRenderer my_renderer (dptr);
 MenuSystem ms(my_renderer);
 elapsedMillis switchesPressTimer;
+elapsedMillis toggleTimer;
+int toggleState = 0; //0=off, 1=up, 2=down
 
 //debug values
 elapsedMillis debugTimer1;
@@ -143,6 +145,8 @@ void Stomp3ON(void);
 void Stomp4ON(void);
 void Tog1ON(void);
 void Tog2ON(void);
+void TogOff(void); // same for both
+void updateToggles(void);
 void slider1Inc (int);
 void slider1Dec (int);
 void slider2Inc (int);
@@ -523,10 +527,12 @@ class Scene : public Data<int> {
       display.setFont (&FreeMono9pt7b);
       display.println ("001 - 128 + scenes");
       display.display();
-      if (storedSettings.msdelay > 0.05) {
-        delay (storedSettings.msdelay * 1000);
-        for (int i = 0; i < 4; i++) {
-          CCbleTXmidi (i + 4, faderValue[i]);
+      if (toggleState==0) {
+        if (storedSettings.msdelay > 0.05) {
+          delay (storedSettings.msdelay * 1000);
+          for (int i = 0; i < 4; i++) {
+            CCbleTXmidi (i + 4, faderValue[i]);
+          }
         }
       }
     }
@@ -541,10 +547,12 @@ class Scene : public Data<int> {
       display.printf ("%03d%s%d", storedSettings.program + 1, ":", Update);
       display.display();
       updateprogram = storedSettings.program;
-      if (storedSettings.msdelay > 0.05) {
-        delay (storedSettings.msdelay * 1000);
-        for (int i = 0; i < 4; i++) {
-          CCbleTXmidi (i + 4, faderValue[i]);
+      if (toggleState>0) {
+        if (storedSettings.msdelay > 0.05) {
+          delay (storedSettings.msdelay * 1000);
+          for (int i = 0; i < 4; i++) {
+            CCbleTXmidi (i + 4, faderValue[i]);
+          }
         }
       }
     }
@@ -605,10 +613,12 @@ class PresetControl : public Base {
       bignumberstored();
       display.display();
       updateprogram = storedSettings.program;
-      if (storedSettings.msdelay > 0.05) {
-        delay (storedSettings.msdelay * 1000);
-        for (int i = 0; i < 4; i++) {
-          CCbleTXmidi (i + 4, faderValue[i]);
+      if (toggleState==0) {
+        if (storedSettings.msdelay > 0.05) {
+          delay (storedSettings.msdelay * 1000);
+          for (int i = 0; i < 4; i++) {
+            CCbleTXmidi (i + 4, faderValue[i]);
+          }
         }
       }
     }
@@ -717,10 +727,12 @@ class Preset2 : public PresetControl {
         display.println ("001 - 128 + scenes");
       }
       display.display();
-      if (storedSettings.msdelay > 0.05) {
-        delay (storedSettings.msdelay * 1000);
-        for (int i = 0; i < 4; i++) {
-          CCbleTXmidi (i + 4, faderValue[i]);
+      if (toggleState==0) {
+        if (storedSettings.msdelay > 0.05) {
+          delay (storedSettings.msdelay * 1000);
+          for (int i = 0; i < 4; i++) {
+            CCbleTXmidi (i + 4, faderValue[i]);
+          }
         }
       }
       }*/
@@ -885,21 +897,24 @@ void state1 :: execute2 () { //execute2 is rightrotary
 }
 void state1 :: execute3 () { //press select button is execute3
   storedSettings.program = updateprogram;
-  if (isConnected) {
-    midi.send(0xC0 + (storedSettings.channel - 1), storedSettings.program, storedSettings.program);
-  }
-  //wired midi
-  Serial1.write(0xC0 + (storedSettings.channel - 1));
-  Serial1.write(storedSettings.program);
-  Serial1.write(storedSettings.program);
+  if (toggleState==0) {
+    if (isConnected) {
+      midi.send(0xC0 + (storedSettings.channel - 1), storedSettings.program, storedSettings.program);
+    }
+    //wired midi
+    Serial1.write(0xC0 + (storedSettings.channel - 1));
+    Serial1.write(storedSettings.program);
+    Serial1.write(storedSettings.program);
+  
+    my_flash_store.write(storedSettings);
+    // if (storedSettings.msdelay > 0.05) {
+    //   delay (storedSettings.msdelay * 1000);
+    //   for (int i = 0; i < 4; i++) {
+    //     CCbleTXmidi (i + 4, faderValue[i]);
+    //   }
+    // }
 
-  my_flash_store.write(storedSettings);
-  // if (storedSettings.msdelay > 0.05) {
-  //   delay (storedSettings.msdelay * 1000);
-  //   for (int i = 0; i < 4; i++) {
-  //     CCbleTXmidi (i + 4, faderValue[i]);
-  //   }
-  // }
+  }
   currentDataPointer->store();
 }
 void state1 :: execute4 () { //press edit button is execute4
@@ -1122,7 +1137,9 @@ void setup() {
   Buttons.SetHandleB5ON (Stomp3ON);
   Buttons.SetHandleB6ON (Stomp4ON);
   Buttons.SetHandleB7ON (Tog1ON);
+  Buttons.SetHandleB7OFF (TogOff);
   Buttons.SetHandleB8ON (Tog2ON);
+  Buttons.SetHandleB8OFF (TogOff);
   slider1.SetHandleIncrease (slider1Inc);
   slider1.SetHandleDecrease (slider1Dec);
   slider2.SetHandleIncrease (slider2Inc);
@@ -1220,7 +1237,24 @@ void loop() {
   ble.update(500); // interval for each scanning ~ 500ms (non blocking)
   encoder1.Read();
   Buttons.ReadWrite();
+  updateToggles();
   Fader::ReadWrite();
+}
+
+void updateToggles () {
+  if (toggleState>0 && toggleTimer>300) {
+    if (currentState->identifier==1) {
+      if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
+        if (toggleState==1) {
+          currentDataPointer->plus();
+        } else if (toggleState==2) {
+          currentDataPointer->minus();
+        }
+        currentState->execute3();
+      }
+    }
+    toggleTimer = 0;
+  } 
 }
 
 void buttpressDisplayUpdate (void) {
@@ -1412,6 +1446,7 @@ void  Tog1ON (void) {
   //if on preset select screen
   if (currentState->identifier==1) {
     if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
+      toggleState=1;
       currentDataPointer->plus();
       currentState->execute3();
     } else { //keep the preset the same - increment the screne
@@ -1429,13 +1464,21 @@ void  Tog2ON (void) {
   //if on preset select screen
   if (currentState->identifier==1) {
     if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
+      toggleState=2;
       currentDataPointer->minus();
       currentState->execute3();
-    } else { //keep the preset the same - increment the screne
-
-    }
+    } 
   } else {
     currentState->execute1();
+  }
+}
+
+void TogOff(void) {
+  toggleState = 0;
+  if (currentState->identifier==1) {
+    if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
+      currentState->execute3();
+    }
   }
 }
 
