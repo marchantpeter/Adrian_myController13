@@ -97,6 +97,10 @@ MenuSystem ms(my_renderer);
 elapsedMillis switchesPressTimer;
 elapsedMillis toggleTimer;
 int toggleState = 0; //0=off, 1=up, 2=down
+int toggleAccelerationCounter = 0; //for acceleration
+int toggleAccelerationCount [6] = {2, 4, 6, 8, 10, 12}; //ie up to the first index of movement while the toggle is held - it will wait the first index of millis inbetween movements.  
+int toggleAccelerationMs [6] = {800, 500, 350, 200, 130, 75}; 
+
 
 //debug values
 elapsedMillis debugTimer1;
@@ -582,26 +586,29 @@ class Scene : public Data<int> {
 class PresetControl : public Base {
   public:
     void peripheralDisplayUpdate () {
-      display.clearDisplay();
-      display.setFont ();
-      display.setCursor(0, 2);
-      display.setTextColor(WHITE);
-      display.setTextSize(1);
-      display.println("SELECT NEXT");
-      display.setFont ();
-      display.setCursor(0, 15);
-      display.setTextColor(WHITE);
-      display.setTextSize(1);
-      display.println("PRESET:");
-      display.setCursor(-4, 55);
-      bignumber ();
-      display.setFont ();
-      display.setCursor(85, 32);
-      display.setTextSize(1);
-      display.print ("CURRENT");
-      display.setCursor(84, 55);
-      smallnumber ();
-      display.display();
+      if (toggleTimer>50) {
+        display.clearDisplay();
+        display.setFont ();
+        display.setCursor(0, 2);
+        display.setTextColor(WHITE);
+        display.setTextSize(1);
+        display.println("SELECT NEXT");
+        display.setFont ();
+        display.setCursor(0, 15);
+        display.setTextColor(WHITE);
+        display.setTextSize(1);
+        display.println("PRESET:");
+        display.setCursor(-4, 55);
+        bignumber ();
+        display.setFont ();
+        display.setCursor(85, 32);
+        display.setTextSize(1);
+        display.print ("CURRENT");
+        display.setCursor(84, 55);
+        smallnumber ();
+        display.display();
+      }
+    
     }
     virtual void currentPreset () {
       display.clearDisplay();
@@ -737,7 +744,7 @@ class Preset2 : public PresetControl {
       }
       }*/
 
-      void incrementBy (int amount) {
+    void incrementBy (int amount) {
       Serial.println("preset 1 increment by");
       updateprogram+=amount;
       if (updateprogram >= 128) {
@@ -1242,7 +1249,14 @@ void loop() {
 }
 
 void updateToggles () {
-  if (toggleState>0 && toggleTimer>300) {
+  int delay = toggleAccelerationMs[5];
+  for (int i=0; i<6; i++) {
+    if (toggleAccelerationCounter<toggleAccelerationCount[i]) {
+      delay = toggleAccelerationMs[i];
+      break;
+    }
+  }
+  if (toggleState>0 && toggleTimer>delay) {
     if (currentState->identifier==1) {
       if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
         if (toggleState==1) {
@@ -1250,7 +1264,9 @@ void updateToggles () {
         } else if (toggleState==2) {
           currentDataPointer->minus();
         }
-        currentState->execute3();
+        toggleAccelerationCounter++;
+        //currentState->execute3(); //show current preset screen
+        currentDataPointer->select(); //show next preset screen with current preset in bottom right
       }
     }
     toggleTimer = 0;
@@ -1448,7 +1464,10 @@ void  Tog1ON (void) {
     if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
       toggleState=1;
       currentDataPointer->plus();
-      currentState->execute3();
+      //currentState->execute3(); //show current preset screen
+      toggleTimer=0;
+      currentDataPointer->select();
+      
     } else { //keep the preset the same - increment the screne
 
     }
@@ -1466,7 +1485,9 @@ void  Tog2ON (void) {
     if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
       toggleState=2;
       currentDataPointer->minus();
-      currentState->execute3();
+      //currentState->execute3(); //show current preset screen
+      currentDataPointer->select();
+      toggleTimer=0;
     } 
   } else {
     currentState->execute1();
@@ -1475,6 +1496,9 @@ void  Tog2ON (void) {
 
 void TogOff(void) {
   toggleState = 0;
+  toggleAccelerationCounter = 0;
+  toggleTimer = 0;
+  
   if (currentState->identifier==1) {
     if (storedSettings.preset>=21 && storedSettings.preset<=24) { //normal presets - increment and select it
       currentState->execute3();
